@@ -7,15 +7,16 @@
 	"Code should be able to read or write P3 or P6 ppm files."	*/
 
 int main(int args, char *argv[]){
+
 	if (args != 4) {
 		printf("Program requires: 'P# <inputname>.ppm <outputname>.ppm'");
 		return(1);
 	  }
-	if(*argv[1] != '3'){
-		printf("First input must be an integer");
+	// Check to see if the accepted P-type ppms are being asked for.
+	if((*argv[1] != '3') && (*argv[1] != '6')){
+		printf("This program only works with P3 and P6 type ppm files.");
 		return(2);
 	}
-	  
 	printf("Hello World");
 	return(0);
 }
