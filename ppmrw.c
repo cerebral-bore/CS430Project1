@@ -11,6 +11,10 @@ int main(int args, char *argv[]){
 		printf("Program requires: 'P# <inputname>.ppm <outputname>.ppm'");
 		return(1);
 	  }
+	if(*argv[1] != '3'){
+		printf("First input must be an integer");
+		return(2);
+	}
 	  
 	printf("Hello World");
 	return(0);
