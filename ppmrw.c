@@ -4,8 +4,13 @@
 /* 	Jesus Garcia
 	Project 1 - Images - 9/15/16
 	CS430 - Prof. Palmer
-	"Code should be able to read or write P3 or P6 ppm files."	*/
+	"Code should be able to read or write P3 or P6 ppm files."
+	Your program (ppmrw) should have this usage pattern to convert a P3 or P6 image to P3	
+		ppmrw 3 <input.pmm> <output.pmm> or ppmrw 6 <input.pmm> <output.pmm>
+	Your program (ppmrw) should have this usage pattern to convert a P3 or P6 image to P6 */
 	
+
+
 int errCheck(char str[], int args, int inputnum);
 void writePPM(char outputName[]);
 
@@ -32,23 +37,25 @@ int main(int args, char *argv[]){
 	
 }
 
+
+
 int errCheck(char str[], int args, int inputnum){
 	
 	// Check to see if there are 3 input arguments on launch
 	if (args != 4) {
-		fprintf(stderr, "Program requires: 'P# <inputname>.ppm <outputname>.ppm'");
+		fprintf(stderr, "Error: Program requires usage: 'P# <inputname>.ppm <outputname>.ppm'");
 		return(1);
 	}
 	  
 	// Check to see if the accepted P-type ppms are being asked for.
 	if((inputnum != 3) && (inputnum != 6)){
-		fprintf(stderr, "This program only works with P3 and P6 type ppm files.");
+		fprintf(stderr, "Error: This program only works with P3 and P6 type ppm files.");
 		return(2);
 	}
 	
 	// Check to see if the ppm file actually is P3 or P6
 	if((str[1] != '3') && (str[1] != '6')){
-		fprintf(stderr, "PPM file is not P3 or P6.");
+		fprintf(stderr, "Error: PPM file is not P3 or P6.");
 		return(3);
 	}
 	return(0);
