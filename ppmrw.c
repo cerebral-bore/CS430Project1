@@ -10,11 +10,17 @@
 	Your program (ppmrw) should have this usage pattern to convert a P3 or P6 image to P6 */
 	
 
-
 int errCheck(char str[], int args, int inputnum);
 void writePPM(char outputName[]);
 
+
 int main(int args, char *argv[]){
+	
+	// Initial check to see if there are 3 input arguments on launch
+	if (args != 4) {
+		fprintf(stderr, "Error: Program requires usage: 'P# <inputname>.ppm <outputname>.ppm'");
+		return(1);
+	}
 	
 	char str[3];
 	int errCode;
@@ -22,13 +28,7 @@ int main(int args, char *argv[]){
 	
 	/* opening file for reading */
     FILE* fh = fopen("filename.data" , "r");
-	
-	// Code taken from Tutorialspoint.com C function library, reads a line from ppm file
-	if( fgets (str, 3, fh) != NULL ) 
-	{
-      /* writing content to stdout */
-      puts(str);
-	}
+	fgets(str, 3, fh); // Read a line from file
 	
 	if((errCode = errCheck(str, args, inputnum)) > 0){ return errCode; }
 	
@@ -40,12 +40,6 @@ int main(int args, char *argv[]){
 
 
 int errCheck(char str[], int args, int inputnum){
-	
-	// Check to see if there are 3 input arguments on launch
-	if (args != 4) {
-		fprintf(stderr, "Error: Program requires usage: 'P# <inputname>.ppm <outputname>.ppm'");
-		return(1);
-	}
 	  
 	// Check to see if the accepted P-type ppms are being asked for.
 	if((inputnum != 3) && (inputnum != 6)){
