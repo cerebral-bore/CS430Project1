@@ -7,6 +7,7 @@
 	"Code should be able to read or write P3 or P6 ppm files."	*/
 	
 int errCheck(char str[], int args, int inputnum);
+void writePPM(char outputName[]);
 
 int main(int args, char *argv[]){
 	
@@ -15,7 +16,7 @@ int main(int args, char *argv[]){
 	int inputnum = *argv[1] - '0';
 	
 	/* opening file for reading */
-    FILE *fh = fopen("output_3.ppm" , "r");
+    FILE* fh = fopen("filename.data" , "r");
 	
 	// Code taken from Tutorialspoint.com C function library, reads a line from ppm file
 	if( fgets (str, 3, fh) != NULL ) 
@@ -24,14 +25,11 @@ int main(int args, char *argv[]){
       puts(str);
 	}
 	
-	errCode = errCheck(str, args, inputnum);
+	if((errCode = errCheck(str, args, inputnum)) > 0){ return errCode; }
 	
-	if(errCode > 0){
-		return errCode;
-	}
-	
-	printf("Hello World");
+	writePPM(argv[3]);
 	return(0);
+	
 }
 
 int errCheck(char str[], int args, int inputnum){
@@ -40,7 +38,7 @@ int errCheck(char str[], int args, int inputnum){
 	if (args != 4) {
 		fprintf(stderr, "Program requires: 'P# <inputname>.ppm <outputname>.ppm'");
 		return(1);
-	  }
+	}
 	  
 	// Check to see if the accepted P-type ppms are being asked for.
 	if((inputnum != 3) && (inputnum != 6)){
@@ -54,4 +52,21 @@ int errCheck(char str[], int args, int inputnum){
 		return(3);
 	}
 	return(0);
+}
+
+void writePPM(char outputName[]){
+	FILE* fh2 = fopen(outputName, "w");
+	
+	unsigned char size = 4;
+	unsigned char colordepth = 255;
+	fprintf(fh2, "P3\n# CREATOR: Jesus Garcia\n");
+	fprintf(fh2, "%d ", size);
+	fprintf(fh2, "%d", size);
+	fprintf(fh2, "\n");
+	fprintf(fh2, "%d", colordepth);
+	
+	fprintf(fh2, "\n255 255 255   0 0 0   0 0 255   255 0 255 \n");
+	fprintf(fh2, "255 0 0   0 255 127   0 255 0   0 0 0 \n");
+	fprintf(fh2, "0 255 0   0 0 0   0 255 127   255 0 0 \n");
+	fprintf(fh2, "255 0 255   0 0 255   0 0 0   255 255 255");
 }
