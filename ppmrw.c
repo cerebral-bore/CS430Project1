@@ -18,7 +18,7 @@ int main(int args, char *argv[]){
 	
 	// Initial check to see if there are 3 input arguments on launch
 	if (args != 4) {
-		fprintf(stderr, "Error: Program requires usage: 'P# <inputname>.ppm <outputname>.ppm'");
+		fprintf(stderr, "Error: Program requires usage: '# <inputname>.ppm <outputname>.ppm'");
 		return(1);
 	}
 	
@@ -61,11 +61,8 @@ void writePPM(char outputName[]){
 	unsigned char size = 4;
 	unsigned char colordepth = 255;
 	fprintf(fh2, "P3\n# CREATOR: Jesus Garcia\n");
-	fprintf(fh2, "%d ", size);
-	fprintf(fh2, "%d", size);
-	fprintf(fh2, "\n");
-	fprintf(fh2, "%d", colordepth);
-	
+	fprintf(fh2, "%d %d\n%d", size, size, colordepth);
+
 	fprintf(fh2, "\n255 255 255   0 0 0   0 0 255   255 0 255 \n");
 	fprintf(fh2, "255 0 0   0 255 127   0 255 0   0 0 0 \n");
 	fprintf(fh2, "0 255 0   0 0 0   0 255 127   255 0 0 \n");
