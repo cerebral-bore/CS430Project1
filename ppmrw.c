@@ -3,17 +3,26 @@
 #include <string.h>
 
 /* 	Jesus Garcia
-	Project 1 - Images - 9/15/16
+	Project 1 - pictures - 9/15/16
 	CS430 - Prof. Palmer
 	"Code should be able to read or write P3 or P6 ppm files."
-	Your program (ppmrw) should have this usage pattern to convert a P3 or P6 image to P3	
+	Your program (ppmrw) should have this usage pattern to convert a P3 or P6 picture to P3	
 		ppmrw 3 <input.pmm> <output.pmm> or ppmrw 6 <input.pmm> <output.pmm>
-	Your program (ppmrw) should have this usage pattern to convert a P3 or P6 image to P6 */
+	Your program (ppmrw) should have this usage pattern to convert a P3 or P6 picture to P6
+
+*/
 	
+typedef struct pixData{
+	unsigned char r,g,b;
+} pixData;
+
+typedef struct pixMap{
+	unsigned char width, height;
+	pixData *pixel;
+} pixMap;
 
 int errCheck(int args, char *argv[]);
-void writePPM(char outputName[]);
-
+void writePPM(const char outputName[]);
 
 int main(int args, char *argv[]){
 	
@@ -33,6 +42,8 @@ int main(int args, char *argv[]){
 	return(0);
 	
 }
+
+
 
 int errCheck(int args, char *argv[]){
 	
@@ -72,7 +83,6 @@ int errCheck(int args, char *argv[]){
 	}
 	
 	char str[5];
-	
 	FILE* fh = fopen(argv[2] , "r");
 	fgets(str, 3, fh); // Read a line from file
 	fclose(fh);
@@ -87,7 +97,7 @@ int errCheck(int args, char *argv[]){
 	
 }
 
-void writePPM(char outputName[]){
+void writePPM(const char outputName[]){
 	FILE* fh2 = fopen(outputName, "w");
 	
 	unsigned char size = 4;
@@ -100,4 +110,67 @@ void writePPM(char outputName[]){
 	fprintf(fh2, "0 255 0   0 0 0   0 255 127   255 0 0 \n");
 	fprintf(fh2, "255 0 255   0 0 255   0 0 0   255 255 255");
 	fclose(fh2);
+}
+
+static pixMap *getP6PPM(const char *filename)
+{
+		
+	char buffer[8];					// buffer of size 8
+	pixMap *picture; 				// Struct creation, contains a 'width', 'height', 'pixData'
+	FILE *inFile;					// File handler
+	int c, rgb_comp_color;			// c is to be used for comment checking, rgb_c_c
+	inFile = fopen(filename, "rb");	// Open PPM file for reading
+	
+	/* This code must run in this order as the ppm file must follow
+		A specific pattern of reads and writes */
+
+	if (!fgets(buffer, sizeof(buffer), inFile)){	// Loads picture format into buffer[] array
+		fprintf(stderr, "Unable to allocate memory\n", filename);
+		exit(1);
+	}
+    
+    picture = (pixMap* )malloc(sizeof(pixMap));	// Allocate memory from picture
+    if (picture == NULL) {								// If picture is allowed no memory
+         fprintf(stderr, "Unable to allocate memory\n");
+         exit(1);
+    }
+
+    // This code block will skip past a comment line
+    c = getc(inFile);					// Usage of c int
+    while (c == '#') { 					// Check for comments
+		while (getc(inFile) != '\n') ;	// This while loop stops when a newline is found
+		c = getc(inFile);				// Read the comment line
+    }
+    ungetc(c, inFile);	// Clear the c variable
+	
+    // Load picture size
+    if (fscanf(inFile, "%d %d", &picture->width, &picture->height) != 2) {	// Stores the width and height of pic
+         fprintf(stderr, "Error: File has invalid width and/or height.\n");
+         exit(1);
+    }
+    // Load RGB color depth
+    if (fscanf(inFile, "%d", &rgb_comp_color) != 1) { // Reads the single line where max color depth is
+         fprintf(stderr, "Error: Invalid rgb component\n");
+         exit(1);
+    }
+    // ENSURES ONLY FUNCTIONS FOR 8bit RGB ppms
+    if (rgb_comp_color!= 255) {	// 255 = 8 bits of all 1's or '1111 1111'
+         fprintf(stderr, "Error: RGB component must be 8 bit RGB\n", filename);
+         exit(1);
+    }
+    while (fgetc(inFile) != '\n') ; // Clear whitespaces
+    (*picture).pixel = (pixData*)malloc((*picture).width * (*picture).height * sizeof(pixData)); // Allocate sufficient memory for the pixMap pixel data
+    if (!picture) {	// Check if picture is not NULL
+         fprintf(stderr, "Error: Memory Allocation failed.\n");
+         exit(1);
+    }
+    //read pixel data from file
+    if (fread((*picture).pixel, 3 * (*picture).width, (*picture).height, inFile) != (*picture).height) {	// Check if stored data is same length as original pictures height
+         fprintf(stderr, "Error: Data corruption.\n", filename);
+         exit(1); 
+    }
+
+	// Close off the input file
+    fclose(inFile);
+    return picture;	// Return the pixMap data
 }
