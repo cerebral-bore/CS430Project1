@@ -23,12 +23,13 @@ typedef struct pixMap{
 
 int errCheck(int args, char *argv[]);
 void writePPM(const char outputName[]);
+static pixMap *getP6PPM(const char *filename);
+void createp6PPM(const char *filename, pixMap *picture);
 
 int main(int args, char *argv[]){
 	
 	// Run the error checks
-	int errCode;
-	if((errCode = errCheck(args, argv)) > 0){ return errCode; }
+	errCheck(args, argv);
 	
 	char str[3];
 	
@@ -37,8 +38,10 @@ int main(int args, char *argv[]){
 	fgets(str, 3, fh); // Read a line from file
 	
 	writePPM(argv[3]);
-	printf("Program run successfully.");
+	printf("Program 1 run successfully.");
 	fclose(fh);
+	createp6PPM(argv[3], getP6PPM(argv[2]));
+	printf("Program 2 run successfully.");
 	return(0);
 	
 }
@@ -50,7 +53,7 @@ int errCheck(int args, char *argv[]){
 	// Initial check to see if there are 3 input arguments on launch
 	if (args != 4) {
 		fprintf(stderr, "Error: Program requires usage: '# <inputname>.ppm <outputname>.ppm'");
-		return(1);
+		exit(1);
 	}
 	
 	// Check the file extension of input and output files
@@ -66,20 +69,20 @@ int errCheck(int args, char *argv[]){
 	// Check to see if the inputfile is in .ppm format
 	if(strcmp(extIn, ".ppm") != 0){
 		printf("Error: Input file not a PPM");
-		return(2);
+		exit(2);
 	}
 	
 	// Check to see if the inputfile is in .ppm format
 	if(strcmp(extOut, ".ppm") != 0){
 		printf("Error: Output file not a PPM");
-		return(3);
+		exit(3);
 	}
 	
 	// Check to see if the accepted P-type ppms are being asked for.
 	int inputnum = *argv[1] - '0';
 	if((inputnum != 3) && (inputnum != 6)){
 		fprintf(stderr, "Error: This program only works with P3 and P6 type ppm files.");
-		return(4);
+		exit(4);
 	}
 	
 	char str[5];
@@ -90,7 +93,7 @@ int errCheck(int args, char *argv[]){
 	// Check to see if the ppm file actually is P3 or P6
 	if((str[1] != '3') && (str[1] != '6')){
 		fprintf(stderr, "Error: PPM file is not P3 or P6.");
-		return(5);
+		exit(5);
 	}
 	
 	return(0);
@@ -126,13 +129,13 @@ static pixMap *getP6PPM(const char *filename)
 
 	if (!fgets(buffer, sizeof(buffer), inFile)){	// Loads picture format into buffer[] array
 		fprintf(stderr, "Unable to allocate memory\n", filename);
-		exit(1);
+		exit(6);
 	}
     
     picture = (pixMap* )malloc(sizeof(pixMap));	// Allocate memory from picture
     if (picture == NULL) {								// If picture is allowed no memory
          fprintf(stderr, "Unable to allocate memory\n");
-         exit(1);
+         exit(7);
     }
 
     // This code block will skip past a comment line
@@ -146,31 +149,48 @@ static pixMap *getP6PPM(const char *filename)
     // Load picture size
     if (fscanf(inFile, "%d %d", &picture->width, &picture->height) != 2) {	// Stores the width and height of pic
          fprintf(stderr, "Error: File has invalid width and/or height.\n");
-         exit(1);
+         exit(8);
     }
     // Load RGB color depth
     if (fscanf(inFile, "%d", &rgb_comp_color) != 1) { // Reads the single line where max color depth is
          fprintf(stderr, "Error: Invalid rgb component\n");
-         exit(1);
+         exit(9);
     }
     // ENSURES ONLY FUNCTIONS FOR 8bit RGB ppms
     if (rgb_comp_color!= 255) {	// 255 = 8 bits of all 1's or '1111 1111'
          fprintf(stderr, "Error: RGB component must be 8 bit RGB\n", filename);
-         exit(1);
+         exit(10);
     }
     while (fgetc(inFile) != '\n') ; // Clear whitespaces
     (*picture).pixel = (pixData*)malloc((*picture).width * (*picture).height * sizeof(pixData)); // Allocate sufficient memory for the pixMap pixel data
     if (!picture) {	// Check if picture is not NULL
          fprintf(stderr, "Error: Memory Allocation failed.\n");
-         exit(1);
+         exit(11);
     }
     //read pixel data from file
     if (fread((*picture).pixel, 3 * (*picture).width, (*picture).height, inFile) != (*picture).height) {	// Check if stored data is same length as original pictures height
          fprintf(stderr, "Error: Data corruption.\n", filename);
-         exit(1); 
+         exit(12); 
     }
 
 	// Close off the input file
     fclose(inFile);
     return picture;	// Return the pixMap data
+}
+
+void createp6PPM(const char *filename, pixMap *picture)
+{
+	// Create/open file to output p6 file to
+    FILE *outFile;
+    outFile = fopen(filename, "wb");
+
+    //write the header file
+		fprintf(outFile, "P6\n");										// PPM format (P6)
+		fprintf(outFile, "# An auto comment line\n");					// Comment line
+		fprintf(outFile, "%d %d\n",(*picture).width,(*picture).height);	// Dimensions of ppm file
+		fprintf(outFile, "%d\n", 255);									// 8 bit RGB color depth
+
+	// Binary pixel/pixmap data
+	fwrite((*picture).pixel, 3 * (*picture).width, (*picture).height, outFile);
+    fclose(outFile); // Close file
 }
