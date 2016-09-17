@@ -31,17 +31,13 @@ int main(int args, char *argv[]){
 	// Run the error checks
 	errCheck(args, argv);
 	
-	char str[3];
-	
-	/* opening file for reading */
-    FILE* fh = fopen(argv[2] , "r");
-	fgets(str, 3, fh); // Read a line from file
-	
-	writePPM(argv[3]);
-	printf("Program 1 run successfully.");
-	fclose(fh);
-	createp6PPM(argv[3], getP6PPM(argv[2]));
-	printf("Program 2 run successfully.");
+	int inputnum = *argv[1] - '0';
+	if(inputnum == 3){
+		writePPM(argv[3]);
+	}else if(inputnum == 6){
+		createp6PPM(argv[3], getP6PPM(argv[2]));
+	}
+	printf("Program run successfully.");
 	return(0);
 	
 }
@@ -95,15 +91,13 @@ int errCheck(int args, char *argv[]){
 		fprintf(stderr, "Error: PPM file is not P3 or P6.");
 		exit(5);
 	}
-	
 	return(0);
-	
 }
 
 void writePPM(const char outputName[]){
 	FILE* fh2 = fopen(outputName, "w");
 	
-	unsigned char size = 4;
+	unsigned char size = 8;
 	unsigned char colordepth = 255;
 	fprintf(fh2, "P3\n# CREATOR: Jesus Garcia\n");
 	fprintf(fh2, "%d %d\n%d", size, size, colordepth);
@@ -113,6 +107,10 @@ void writePPM(const char outputName[]){
 	fprintf(fh2, "0 255 0   0 0 0   0 255 127   255 0 0 \n");
 	fprintf(fh2, "255 0 255   0 0 255   0 0 0   255 255 255");
 	fclose(fh2);
+}
+
+static unsigned char *getP3PPM(const char *filename){
+	
 }
 
 static pixMap *getP6PPM(const char *filename)
@@ -192,5 +190,5 @@ void createp6PPM(const char *filename, pixMap *picture)
 
 	// Binary pixel/pixmap data
 	fwrite((*picture).pixel, 3 * (*picture).width, (*picture).height, outFile);
-    fclose(outFile); // Close file
+    fclose(outFile); // Close off output file
 }
